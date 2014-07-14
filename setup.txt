@@ -1,0 +1,6 @@
+T,140616.raw
+G,vost-gaz-2.csv
+G,vost-gaz-3.csv
+G,vost-gaz-4.csv
+G,vost-gaz-5.csv
+G,vost-gaz-temp.csv
