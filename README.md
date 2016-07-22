@@ -1,6 +1,4 @@
-Converter_GPS_Nikon
-===================
-
+Converter GPS Achtech and Nikon Nivo 5M
 Конвертер гео-данных v1.00.01
 2014-11-11
 
