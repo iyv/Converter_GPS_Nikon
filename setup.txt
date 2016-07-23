@@ -1,1 +1,1 @@
-G,test.csv
+C,test.raw

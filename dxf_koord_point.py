@@ -25,6 +25,7 @@ C - данные в формате тахеометра преобразуютс
 
 import sdxf
 import math
+import os
 
 layerName = 'METKI01'
 layerColor = 1
@@ -60,72 +61,44 @@ def metka(obj, x, y, txt, lay):
     
 #---------------------------------------------------------------------------------------------
 def Taheometr(FilePath):
-    number_words=0
     file_open=open(FilePath, 'r')
     for txt_string in file_open:
-        #print('---------tah-----------')
-        num_simbol=0
-        dlina_stroki=len(txt_string)-1
-        while(num_simbol < dlina_stroki):
-            stroka_data=""
-            while((txt_string[num_simbol]!=',')and(num_simbol<dlina_stroki)):
-                stroka_data+=txt_string[num_simbol]
-                num_simbol+=1
-            #перескакиваем через запятую
-            num_simbol+=1
-            #увеличиваем колличество слов на 1
-            number_words+=1
-            if (number_words==1):
-                name_point=stroka_data
-                #print(stroka_data)
-            elif (number_words==2):
-                x=float(stroka_data)
-                #print(stroka_data)
-            elif (number_words==3):
-                y=float(stroka_data)
-                #print(stroka_data)
-        #print('======================')
-        #Обнуляем количество слов в строке
-        number_words=0
-        #Добавляем в чертеж блок с данными координатами
-        metka(DXFObj,x,y,name_point,layerName)
+        txt_string = txt_string.rstrip('\n')
+        dataT = txt_string.split(',')
+        if (len(dataT) > 3):
+            #Добавляем в чертеж блок с данными координатами
+            a = float(dataT[1])
+            b = float(dataT[2])
+            if (a < b):
+                c = b
+                b = a
+                a = c
+            metka(DXFObj,a,b,dataT[0],layerName)
+        else:
+            #или выводим сообщение об ошибке в строке
+            if ((txt_string != '') and (txt_string != '\n')):
+                print('WARNING !! Ошибочная строка - ' + txt_string)
 
 #---------------------------------------------------------------------------------------------
 def GPS(FilePath):
-    number_words=0
     file_open=open(FilePath, 'r')
     for txt_string in file_open:
-        #print('---------tah-----------')
-        true_data=True
-        num_simbol=0
-        dlina_stroki=len(txt_string)-1
-        while(num_simbol < dlina_stroki):
-            stroka_data=""
-            while((txt_string[num_simbol]!=',')and(num_simbol<dlina_stroki)):
-                stroka_data+=txt_string[num_simbol]
-                num_simbol+=1
-            #перескакиваем через запятую
-            num_simbol+=1
-            #увеличиваем количество слов на 1
-            number_words+=1
-            if (number_words==1):
-                name_point=stroka_data
-                #print(name_point[0:5])
-                if ((name_point[0:5]=='COMPD')or(name_point[0:2]=='Id')):
-                    true_data=False
-                #print(stroka_data)
-            elif ((number_words==3) and true_data):
-                x=float(stroka_data)
-                #print(stroka_data)
-            elif ((number_words==4) and true_data):
-                y=float(stroka_data)
-                #print(stroka_data)
-        #print('======================')
-        #Обнуляем количество слов в строке
-        number_words=0
-        #Добавляем в чертеж блок с данными координатами
-        if (true_data):
-            metka(DXFObj,x,y,name_point,layerName)
+        txt_string = txt_string.rstrip('\n')
+        dataT = txt_string.split(',')
+        if ((dataT[0] != 'COMPD') and (dataT[0] != 'id')):
+            if (len(dataT) > 4):
+            #Добавляем в чертеж блок с данными координатами
+                a = float(dataT[2])
+                b = float(dataT[3])
+                if (a < b):
+                    c = b
+                    b = a
+                    a = c
+                metka(DXFObj,a,b,dataT[0],layerName)
+            else:
+                #или выводим сообщение об ошибке в строке
+                if ((txt_string != '') and (txt_string != '\n')):
+                    print('WARNING !! Ошибочная строка - ' + txt_string)
             
 #---------------------------------------------------------------------------------------------
 def CreateLine(FilePath):
@@ -133,37 +106,28 @@ def CreateLine(FilePath):
     file_open=open(FilePath, 'r')
     points=[]
     for txt_string in file_open:
-        #print('---------polyline----------')
-        num_simbol=0
-        dlina_stroki=len(txt_string)-1
-        if (dlina_stroki >3):
-            while(num_simbol < dlina_stroki):
-                stroka_data=""
-                while((txt_string[num_simbol]!=',')and(num_simbol<dlina_stroki)):
-                    stroka_data+=txt_string[num_simbol]
-                    num_simbol+=1
-                #перескакиваем через запятую
-                num_simbol+=1
-                #увеличиваем колличество слов на 1
-                number_words+=1
-                if (number_words==1):
-                    name_point=stroka_data
-                    #print(stroka_data)
-                elif (number_words==2):
-                    x=float(stroka_data)
-                    #print(stroka_data)
-                elif (number_words==3):
-                    y=float(stroka_data)
-                    #print(stroka_data)
-            #print('======================')
-            point=(y,x)
-            points.append(point);
-            
-        else:
+        txt_string = txt_string.rstrip('\n')
+        if ((txt_string == '') or (txt_string[0] == '-') or (txt_string[0] == '\n')):  
             DXFObj.append(sdxf.LwPolyLine(points, flag=1))
+            print(' -line create')
             points=[]
-        #Обнуляем количество слов в строке
-        number_words=0
+        else:
+            dataT = txt_string.split(',')
+            if (len(dataT) > 3):
+                #Добавляем в чертеж блок с данными координатами
+                a = float(dataT[1])
+                b = float(dataT[2])
+                if (a < b):
+                    c = b
+                    b = a
+                    a = c
+                metka(DXFObj,a,b,dataT[0],layerName)
+                point=(a,b)
+                points.append(point);
+            else:
+                #или выводим сообщение об ошибке в строке
+                if ((txt_string != '') and (txt_string != '\n')):
+                    print('WARNING !! Ошибочная строка - ' + txt_string)            
 
 #---------------------------------------------------------------------------------------------
 def MSK18Mestn(FilePath):
@@ -176,72 +140,48 @@ def MSK18Mestn(FilePath):
     number_words=0
     file_open=open(FilePath, 'r')
     for txt_string in file_open:
-        #print('-----Convert MSK18------')
-        num_simbol=0
-        dlina_stroki=len(txt_string)-1
-        while(num_simbol < dlina_stroki):
-            stroka_data=""
-            while((txt_string[num_simbol]!=',')and(num_simbol<dlina_stroki)):
-                stroka_data+=txt_string[num_simbol]
-                num_simbol+=1
-            #перескакиваем через запятую
-            num_simbol+=1
-            #увеличиваем колличество слов на 1
-            number_words+=1
-            if (number_words==1):
-                name_point=stroka_data
-                #print(stroka_data)
-            elif (number_words==2):
-                y=float(stroka_data)
-                #print(stroka_data)
-            elif (number_words==3):
-                x=float(stroka_data)
-                #print(stroka_data)
-        #print('======================')
-        #Обнуляем количество слов в строке
-        number_words=0
-        #временные значения
-        Xmsk=x;
-        Ymsk=y;
-        tempX=x-a;
-        tempY=y-b;
-        #расчет координат
-        x2=c+math.sqrt(math.pow(tempX,2)+math.pow(tempY,2))*(-1*math.cos(math.atan(tempY/tempX)-math.radians(0.3019612)))-tempX*0.0000011;
-        y2=d+math.sqrt(math.pow(tempX,2)+math.pow(tempY,2))*(-1*math.sin(math.atan(tempY/tempX)-math.radians(0.3019612)))-tempY*0.0000011;
-        #Добавляем в чертеж блок с данными координатами
-        y=round(x2,2)
-        x=round(y2,2)
-        metka(DXFObj,x,y,name_point,layerName)
-        file_csv.write(name_point + ';' + str(x) + ';' + str(y) + ';' + str(Xmsk)  + ';' + str(Ymsk)+ '\n')
+        txt_string = txt_string.rstrip('\n')
+        dataT = txt_string.split(',')
+        if (len(dataT) > 3):
+            x = float(dataT[1])
+            y = float(dataT[2])
+            if (y < x):
+                z = x
+                x = y
+                y = z
+            #временные значения
+            Xmsk=x;
+            Ymsk=y;
+            tempX=x-a;
+            tempY=y-b;
+            #расчет координат
+            x2=c+math.sqrt(math.pow(tempX,2)+math.pow(tempY,2))*(-1*math.cos(math.atan(tempY/tempX)-math.radians(0.3019612)))-tempX*0.0000011;
+            y2=d+math.sqrt(math.pow(tempX,2)+math.pow(tempY,2))*(-1*math.sin(math.atan(tempY/tempX)-math.radians(0.3019612)))-tempY*0.0000011;
+            #Добавляем в чертеж блок с данными координатами
+            y=round(x2,2)
+            x=round(y2,2)
+            metka(DXFObj,x,y,dataT[0],layerName)
+            file_csv.write(dataT[0] + ';' + str(x) + ';' + str(y) + ';' + str(Xmsk)  + ';' + str(Ymsk)+ '\n')
     file_csv.close()
 
 #---------------------------------------------------------------------------------------------
 FilePath="setup.txt"
-setup_open=open(FilePath, 'r')
-num_block=0
+file_name="setup.txt"
+num_block=0 #переменная последовательной нумерации всех блоков
+#открываем файл настроек
 try:
-    #set the color of the layer
+    setup_open=open(FilePath, 'r')
+    #Создаем объект чертежа
     DXFObj=sdxf.Drawing()
+    #Добавляем слой для рисования и выбираем цвет элементов на нем
     DXFObj.layers.append(sdxf.Layer(name=layerName,color=layerColor))
-
+    #открываем файл настроек и читаем его строки
     for txt in setup_open:
             print('--------------------')
-            num_simbol=0
-            dlina_stroki=len(txt)-1
-            while(num_simbol < dlina_stroki):
-                stroka_data=""
-                while((txt[num_simbol]!=',')and(num_simbol<dlina_stroki)):
-                    stroka_data+=txt[num_simbol]
-                    num_simbol+=1
-                num_simbol+=1
-                tip=stroka_data
-                stroka_data=""
-                while((txt[num_simbol]!=',')and(num_simbol<dlina_stroki)):
-                    stroka_data+=txt[num_simbol]
-                    num_simbol+=1
-                num_simbol+=1
-                file_name=stroka_data
-                
+            dataF = txt.split(',')
+            if (len(dataF) > 1):
+                tip = dataF[0]
+                file_name = dataF[1].rstrip('\n')
                 if (tip=="T"):
                     print("Запущена обработка файла тахеометра "+file_name)
                     Taheometr(file_name)
@@ -258,11 +198,12 @@ try:
                     print("Запущена конвертация координат "+file_name)
                     MSK18Mestn(file_name)
                     print("Файл ("+file_name+")с данными обработан!")
-                                    
+                                
     DXFObj.saveas('Output.dxf')
     print('--------------------')
     print("Файл чертежа (Output.dxf) создан и сохранен....")
-except FileNotFoundError:
+except FileNotFoundError as testErr:
+    print(testErr)
     print ('Не найден файл:', file_name)
 except UnboundLocalError:
     print('Неверное значение в файле:', file_name)
