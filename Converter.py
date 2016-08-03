@@ -43,7 +43,16 @@ class FullForm:
         self.rBut3.grid(column = 0, row = 2, padx = 5, pady = 5, sticky = 'w')
         self.varType.set(1)
 
-        self.FramePath = LabelFrame(frameForm, text = " Файлы: ", labelanchor = 'n', height = 230)
+        #Canvas scrollbar
+        self.ScrollCanv = Canvas(frameForm, height=250, width=300, bg = "red")
+        self.ScrollLine = Scrollbar(frameForm, command=self.ScrollCanv.yview)
+        self.ScrollCanv.configure(yscrollcommand = self.ScrollLine.set)
+        self.ScrollCanv.columnconfigure(0, weight=1)
+        self.ScrollCanv.grid(column = 0, row = 1, sticky = 'wens')
+        self.ScrollLine.grid(column = 1, row = 1, sticky = 'ens')
+
+        #add file to canv
+        self.FramePath = LabelFrame(self.ScrollCanv, text = " Файлы: ", labelanchor = 'n')
         self.FramePath.columnconfigure(0, weight=1)
         self.FramePath.rowconfigure(1, weight=1)
         self.FramePath.grid(column = 0, row = 1, padx = 5, pady = 2, sticky = 'wens')
@@ -83,13 +92,9 @@ class FullForm:
 tk = tkinter.Tk()
 tk.title("Конвертер координат в DXF")
 tk.resizable(width = False, height = True)
-tk.geometry("640x480")
+tk.geometry("840x680")
 
-#tk.rowconfigure(0, weight=1)
 tk.columnconfigure(0, weight=1)
-
-#frame = tkinter.Frame(tk, bg = 'green')
-#frame.grid(column = 0, row = 0,sticky = 'nwes')
 
 FullForm(tk)
 
